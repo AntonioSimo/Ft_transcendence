@@ -1,0 +1,71 @@
+services:
+    backend:
+        build:
+            context: ./Backend
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        image: ${BACKEND_IMAGE_NAME}
+        container_name: ${BACKEND_CONTAINER_NAME}
+        networks:
+            - transcendence
+        ports:
+            - '${BACKEND_PORT}:${BACKEND_PORT}'
+        expose:
+            - ${BACKEND_PORT}
+        volumes:
+            - cert_vol:/cert
+            - ./Backend:/app
+            - /app/node_modules
+    frontend:
+        build:
+            context: ./Frontend
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        image: ${FRONTEND_IMAGE_NAME}
+        container_name: ${FRONTEND_CONTAINER_NAME}
+        networks:
+            - transcendence
+        ports:
+            - '${FRONTEND_PORT}:${FRONTEND_PORT}'
+        depends_on:
+            - backend
+        volumes:
+            - ./Frontend:/app
+            - /app/node_modules
+            - cert_vol:/cert
+    gameserver:
+        build:
+            context: ./GameServer
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+            - ./GameServer/.env
+        environment:
+            - NODE_EXTRA_CA_CERTS=/cert/cert.pem
+        image: ${GAME_IMAGE_NAME}
+        container_name: ${GAME_CONTAINER_NAME}
+        networks:
+            - transcendence
+        expose:
+            - '${GAME_PORT}'
+        ports:
+            - '${GAME_PORT}:${GAME_PORT}'
+        volumes:
+            - cert_vol:/cert
+            - ./GameServer:/app
+            - /app/node_modules
+networks:
+    transcendence:
+        name: transcendence
+        driver: bridge
+
+volumes:
+    cert_vol:
+        name: cert_vol
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: './cert'

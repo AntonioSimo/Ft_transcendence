@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Game {
+  SF1
+  SF2
+  F
+}
+
+enum MatchStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id                     String          @id @default(uuid())
+  OAuth2                 String?
+  TwoFA_secret           String?         @unique
+  email                  String          @unique
+  nickname               String          @unique
+  user_type              String
+  password               String?
+  is_online              Boolean
+  last_loginTime         DateTime
+  tournament_alias       String          @unique
+  avatar_id              String
+  users_blocked          Blocked[]       @relation("UserBlocked")
+  blocks                 Blocked[]       @relation("BlocksUser")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  Message                Message[]
+  groups                 Group[]         @relation("UserGroups")
+  // Matches relations
+  matchesAsParticipant   MatchInfo[]
+  matchesWon             MatchInfo[]      @relation("match_winner")
+}
+
+model Blocked {
+  id                    String @id @default(uuid())
+  blocker_nickname      String
+  blocked_user_nickname String
+  blocked_user          User   @relation("UserBlocked", fields: [blocked_user_nickname], references: [nickname])
+  blocker               User   @relation("BlocksUser", fields: [blocker_nickname], references: [nickname])
+}
+
+model Message {
+  id              String   @id @default(uuid())
+  message         String
+  sender_Nickname String
+  groupId         String
+  created_at      DateTime @default(now())
+  type            String?  @default("chat_message")
+  matchId         String?
+  challengeId     String?
+  challengeStatus String?
+  group           Group    @relation("ChatMessages", fields: [groupId], references: [id])
+  sender          User     @relation(fields: [sender_Nickname], references: [nickname])
+}
+
+model Group {
+  id            String    @id @default(uuid())
+  Chat_messages Message[] @relation("ChatMessages")
+  Users         User[]    @relation("UserGroups")
+}
+
+model FriendRequest {
+  id           String @id @default(uuid())
+  fromNickname String
+  toNickname   String
+  status       String
+  toUser       User   @relation("ReceivedFriendRequests", fields: [toNickname], references: [nickname])
+  fromUser     User   @relation("SentFriendRequests", fields: [fromNickname], references: [nickname])
+}
+
+model MatchInfo {
+  id               String   @id @default(uuid())
+  gameType         Game?
+  createdAt        DateTime @default(now())
+  status           MatchStatus @default(PENDING)
+  expiresAt        DateTime?
+  participants     User[]
+  winnerId         String?
+  winner           User?    @relation("match_winner", fields: [winnerId], references: [id])
+  
+  // Tournament pairs (Semi-Final 1 & 2)
+  sf1Player1       String?
+  sf1Player2       String?
+  sf2Player1       String?
+  sf2Player2       String?
+  
+  // Tournament results
+  sf1Winner        String?
+  sf1Score         String?
+  sf2Winner        String?
+  sf2Score         String?
+  finalWinner      String?
+  finalScore       String?
+}

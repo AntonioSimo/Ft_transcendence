@@ -1,0 +1,26 @@
+{
+	"name": "gameserver",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "tsx srcs/server.ts",
+		"client": "tsx srcs/client.ts",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"devDependencies": {
+		"@types/node": "^24.9.1",
+		"@types/ws": "^8.18.1",
+		"prettier": "^3.8.1",
+		"tsx": "^4.19.2",
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"@fastify/websocket": "^11.2.0",
+		"fastify": "^5.6.1"
+	}
+}

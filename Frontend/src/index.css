@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	font-family: 'Press Start 2P', cursive;
+	color-scheme: light dark;
+}
+
+body {
+	background-color: #000000;
+	font-family: 'Press Start 2P', cursive;
+	margin: 0;
+}
